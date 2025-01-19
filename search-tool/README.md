@@ -45,7 +45,7 @@ const model = new ChatGoogle({
   temperature: 0,
 });
 
-const result = model.invoke(question);
+const result = await model.invoke(question);
 console.log(result.content);
 ```
 
@@ -92,7 +92,7 @@ const model = new ChatGoogle({
 With this, we can invoke the model with our question as we did in the previous section:
 
 ```typescript
-const result = model.invoke(question);
+const result = await model.invoke(question);
 console.log(result.content);
 ```
 
@@ -114,8 +114,127 @@ Or does it?
 Gemini's Google Search Tool provides much of the same reference information
 that we could have gotten through Google Search itself, although it is
 in a slightly different form. LangChainJS provides this as part of
-the `result` object tht we get in the 
+the `result` object that we get from invoking the model with our prompt,
+specifically in the `response_metadata` object.
+
+We can look at the `groundingMetadata` attribute with something like this: 
+
+```typescript
+const result = await model.invoke(question);
+const grounding = result.response_metadata.groundingMetadata ?? {};
+console.log(JSON.stringify(grounding, null, 2));
+```
+
+The `groundingMetadata` object contains several fields that can be
+useful to us. These are all objects provided directly from Gemini,
+and you can read the details at the documentation that I've linked to.
+
+**webSearchQueries** and 
+**[searchEntryPoint](https://ai.google.dev/api/generate-content#SearchEntryPoint)**
+
+Google 
+[requires](https://ai.google.dev/gemini-api/docs/grounding/search-suggestions)
+you to provide the search queries as links to a Google Search Results page.
+To help you do this, it provides a list of the search queries that you
+need to provide in `webSearchQueries`. It also provides some formatted
+HTML which accomplishes this in `searchEntryPoint`.
+
+**[groundingChunks](https://ai.google.dev/api/generate-content#GroundingChunk)**
+
+This is an array of
+[`web`](https://ai.google.dev/api/generate-content#Web)
+objects that contain a `title` and `uri`. These are references that were
+used to ground the information. You can provide them as citations. The
+`title` is usually the name of a domain, while the `uri` is a specialized
+URL that redirects through Google to go to the site with the information
+itself.
+
+**[groundingSupports](https://ai.google.dev/api/generate-content#GroundingSupport)**
+
+This is an array of objects that contain three attributes in each
+array element:
+
+`segment` - Which part of the content we're talking
+about. This contains the start and end index into the string content.
+
+`groundingChunkIndicies` - An array of numeric indexes into the
+`groundingChunks` array. This indicates which of those chunks were used
+to create that output, or is a reference to that output.
+
+`confidenceScores` - Another array of numbers between 0 and 1 
+indicating how likely the reference specified by the corresponding
+`groundingChunkIndicies` element is relevant to the reply given.
+
+You can use all this information to format the output so it provides
+the reference information to the person using your application.
+
+That seems like it might end up being complicated, however, doesn't it?
+Is there a better way?
 
 ## Formatting the response and understanding the source
+
+Fortunately, LangChainJS provides a way to take the output of a model
+and transform it into a more suitable format. These are known as
+[output parsers](https://js.langchain.com/docs/concepts/output_parsers/)
+and work with the LangChain Extension Language (LCEL) as a core component
+of the library.
+
+The Google modules provide a `BaseGoogleSearchOutputParser` abstract
+class which can take an AIMessage and, if there is `groundingMetadata`,
+format it to include this metadata. We'll look at how to create your
+own formatter in a moment, but there are some formatters already
+provided to address a couple of common use cases.
+
+The `SimpleGoogleSearchOutputParser` does some basic formatting and
+is useful for examining the output from the search grounding. More
+useful is probably the `MarkdownGoogleSearchOutputParser` can be
+used to create output that looks very similar to how AI Studio formats
+the output when search grounding is turned on.
+
+When using these classes, we'll need to import the parser we want 
+from the `google-common` package with something like this:
+
+```typescript
+import { SimpleGoogleSearchOutputParser } from "@langchain/google-common";
+```
+
+We then setup a chain where the model will pipe the output to this
+output parser, and we'll invoke this chain. Since the output of this
+chain will be a string, we can just display it. This part might look
+something like this:
+
+```typescript
+const parser = new SimpleGoogleSearchOutputParser();
+const chain = model.pipe(parser);
+
+const result = await chain.invoke(question);
+console.log(result);
+```
+
+This might give us output that looks something like this:
+
+```text
+Google Says:
+The 2024 Nobel Prize in Physics was awarded jointly to John J. Hopfield 
+and Geoffrey E. Hinton. [1, 2, 3, 4]  They were recognized for their 
+foundational discoveries and inventions that enable machine learning with 
+artificial neural networks. [1, 2, 4, 3]  Hinton's contributions included 
+work on the Boltzmann machine, building upon the Hopfield network. [3]
+
+1. aip.org - https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUBnsYv92K2WO8rhfenrR_l8VlkUrXzm4saKwerbhp50YzLAfYZpOUVIknxhZgjQwLy2i1phmdH_zfWquaBFhfSwuMemcI9UvHls0UCuBraT7M0XWOrEl-yegUWO5lz8wS-WGb9NSpXyKJ2LEHa4IVqKZaur9I9pQxN1
+2. youtube.com - https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUBnsYtjy5nhKdekL8InSP-JiGxdvPYgbfcp27IgM96nAohukAkHqsY4pVJ4X4liElC7-dZyzDVWdyu-rsrRJWBXjB0gSChWaz2wTAMzbirTyxfYLbPiHL6lp_QaX8trlUD9V3a4Y92OYg==
+3. utoronto.ca - https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUBnsYufnzAWAqKJkUgLlseRJW_Q2paQlbO0siY0W9jtDtQ9XittUnt4yaK76wtBNv95qHXYA9NbtUl7akTnRwZsVU4UqR84XxOX1UGsnMfts1_lQpUHi_7eOKy5EtPEPoK07_fq8bY0OEQh9YaS_2SgPqRe8zLydqOr3xp38i8cvUTfmFlK-ZCfaWRmlVZI
+4. nsf.gov - https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUBnsYsc9tzlR82NAGHfI2wGz8GpTqnEyP5FXcnSkCYb2zWcj2GSbPq15disZJvYuu3yrxpi7IKFEeeELpaTN_EVwX4T6QxPPVxnyW7NaQ3XizRmZR3AZpLx1oidL57OEsTQJ3zFXJTQwvWnmnvMonkpF4PWYD116vL2101py-vGLaHAtCh9Fuj93_o=
+```
+
+While the `MarkdownGoogleSearchOutputParser` works similarly, just
+with a slightly different format, and should work for most needs,
+there may be cases where you want to modify either of these
+or create a completely different formatter. Let's take a look at
+how you can do this.
+
+## Building your own formatter
+
+## Conclusions
 
 ## Acknowledgements 
