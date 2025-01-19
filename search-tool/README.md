@@ -70,7 +70,12 @@ while Gemini 2.0 has a similar tool called `googleSearch`. While there
 are some differences between the two, LangChainJS lets you use either,
 no matter which model you choose.
 
-We can configure the tool and create a model object that is aware
+We can import the tool to serve as a reference in typescript:
+```typescript
+import { GeminiTool } from "@langchain/google-common";
+```
+
+Then we'll configure the tool and create a model object that is aware
 of the tool thusly:
 
 ```typescript
@@ -84,7 +89,7 @@ const model = new ChatGoogle({
 }).bindTools(tools);
 ```
 
-With this, we can invoke the model with our question:
+With this, we can invoke the model with our question as we did in the previous section:
 
 ```typescript
 const result = model.invoke(question);
@@ -94,7 +99,8 @@ console.log(result.content);
 and get a significantly different answer. Perhaps something like this:
 
 ```text
-The 2024 Nobel Prize for physics was awarded to...
+The 2024 Nobel Prize in Physics was awarded jointly to 
+Geoffrey E. Hinton and John J. Hopfield.
 ```
 
 One difference between this result and what a typical search can provide,
