@@ -235,6 +235,69 @@ how you can do this.
 
 ## Building your own formatter
 
+Although LangChainJS provides some useful formatters with the 
+`SimpleGoogleSearchOutputParser` and `MarkdownGoogleSearchOutputParser`, there
+are certainly cases where it might make sense to either modify one of these
+or to create your own.
+
+The `BaseGoogleSearchOutputParser` is an abstract class that provides four
+abstract methods that you would need to implement, plus one other that might
+be useful to either use or modify.
+
+**`textPrefix()` and `textSuffix()`**
+
+These two methods each take two parameters:
+* `text` - a string with the body of the reply from the Model.
+* `grounding` - the GroundingInfo which contains a `metadata` field with
+  all the metadata specified above in the reply.
+
+It is expected to either return a string or undefined. Undefined is treated
+as if it was an empty string.
+
+As the names suggest, you use this to specify a string that you wish to put
+either before or after content from the model.
+
+**`searchSuggestion()`**
+
+This method is already defined, is passed a GroundingInfo object, and
+returns a string with the `renderedContent` field from the info. You
+may wish to include this as part of your `textSuffix()` implementation.
+
+**`segmentPrefix()` and `segmentSuffix()`**
+
+These methods are called for each `segment` that is available - the part of
+the content that we're talking about in each element of the `groundingSupports`.
+As the names suggest, these are called to insert text either just before
+or just after the text in the segment.
+
+They each take three parameters:
+* `grounding` - the GroundingInfo, which contains the `metadata` for the entire response.
+* `support` - The support information about this specific segment.
+* `index` - Which segment index we're working with, starting with 0
+
+With this, we can see how we might create a 
+
+### QUESTIONS FOR REVIEWERS
+
+Two questions for the reviewers, aside from comments about
+the overall article
+* Should this "Building your own formatter" section be part of this article or another?
+* What should the example be?
+  * Simple formatter: 
+    This is part of the code base already, but I could walk through how it works
+  * HTML formatter: 
+    I like this idea, but there are a lot of complexities to doing this correctly
+    that make me feel like it would make it a bad example
+  * What else?
+
 ## Conclusions
 
 ## Acknowledgements 
+
+The development of the Search Grounding in Gemini 2.0, the Output Parsers
+supporting it, and this documentation were all supported by Google Cloud
+Platform Credits provided by Google. My thanks to the teams at Google
+for their support.
+
+Special thanks to Linda Lawton, Denis V., and Steven Gray for their help,
+feedback, and friendship.
