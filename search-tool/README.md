@@ -181,8 +181,7 @@ and work with the LangChain Extension Language (LCEL) as a core component
 of the library.
 
 We might visualize it as something like this:
-
-### TODO: Diagram goes here
+![Formatting visualization](04-formatting.png)
 
 The Google modules provide a `BaseGoogleSearchOutputParser` abstract
 class which can take an AIMessage and, if there is `groundingMetadata`,
