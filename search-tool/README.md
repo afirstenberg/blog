@@ -25,7 +25,7 @@ As you may remember, Gemini can be accessed on two different
 platforms, AI Studio and Vertex AI, with several different auth
 methods involved. If you're not familiar with developing for
 Gemini with LangChainJS, you should check out 
-[article name here](https://example.com/).
+[LangChain.js and Gemini: Getting Started](https://code.iaflw.com/2024/06/langchainjs-and-gemini-getting-started.html).
 
 For simplicity, we'll be using the `ChatGoogle`
 class from the `google-gauth` package, but you can use one
@@ -103,7 +103,8 @@ The 2024 Nobel Prize in Physics was awarded jointly to
 Geoffrey E. Hinton and John J. Hopfield.
 ```
 
-One difference between this result and what a typical search can provide,
+One difference between this result and what you might get by doing a 
+"traditional" Google Search on the website or on the Google app
 is that we can follow links to help verify the information we get. Calling
 the Gemini API this way doesn't give us access to this information.
 
@@ -178,6 +179,10 @@ and transform it into a more suitable format. These are known as
 [output parsers](https://js.langchain.com/docs/concepts/output_parsers/)
 and work with the LangChain Extension Language (LCEL) as a core component
 of the library.
+
+We might visualize it as something like this:
+
+### TODO: Diagram goes here
 
 The Google modules provide a `BaseGoogleSearchOutputParser` abstract
 class which can take an AIMessage and, if there is `groundingMetadata`,
@@ -275,29 +280,103 @@ They each take three parameters:
 * `support` - The support information about this specific segment.
 * `index` - Which segment index we're working with, starting with 0
 
-With this, we can see how we might create a 
+With this, we can see how the `SimpleGoogleSearchOutputParser` works.
+Our goal in this is to have a formatter that will put a numbered list
+of references after the relevant text, and then have that list appear
+at the bottom.
 
-### QUESTIONS FOR REVIEWERS
+Our class is straightforward. It needs to extend from the
+`BaseGoogleSearchOutputParser` and doesn't need a constructor, since
+there are no other parameters to configure:
 
-Two questions for the reviewers, aside from comments about
-the overall article
-* Should this "Building your own formatter" section be part of this article or another?
-* What should the example be?
-  * Simple formatter: 
-    This is part of the code base already, but I could walk through how it works
-  * HTML formatter: 
-    I like this idea, but there are a lot of complexities to doing this correctly
-    that make me feel like it would make it a bad example
-  * What else?
+```typescript
+export class SimpleGoogleSearchOutputParser extends BaseGoogleSearchOutputParser {
+  // ...
+}
+```
+
+There isn't anything we need to print before each text segment, so we can
+have that function return undefined:
+
+```typescript
+  protected segmentPrefix(
+        _grounding: GroundingInfo,
+        _support: GeminiGroundingSupport,
+        _index: number
+): string | undefined {
+  return undefined;
+}
+```
+
+But after each segment, we want the link indices to be a comma-separated
+list in square brackets. 
+The index number is 0-based, but we want to start with "1"
+since that is more human friendly:
+
+```typescript
+  protected segmentSuffix(
+        _grounding: GroundingInfo,
+        support: GeminiGroundingSupport,
+        _index: number
+): string | undefined {
+  const indices: number[] = support.groundingChunkIndices.map((i) => i + 1);
+  return ` [${indices.join(", ")}]`;
+}
+```
+
+Before the entire block of text, we just want to print a simple message
+about where the results come from:
+
+```typescript
+  protected textPrefix(_text: string, _grounding: GroundingInfo): string {
+    return "Google Says:\n";
+  }
+```
+
+And then after, we need to print that list of indexes (starting with 1).
+To do this, we'll make a utility method that gets the information we need
+(the title and URI) and formats it along with the index number. We can then
+loop over all of the `groundingChunks` and add this formatted string
+to the value returned:
+
+```typescript
+  protected chunkToString(chunk: GeminiGroundingChunk, index: number): string {
+  const info = chunk.retrievedContext ?? chunk.web;
+  return `${index + 1}. ${info.title} - ${info.uri}`;
+}
+
+protected textSuffix(_text: string, grounding: GroundingInfo): string {
+  let ret = "\n";
+  const chunks: GeminiGroundingChunk[] = grounding.metadata.groundingChunks;
+  chunks.forEach((chunk, index) => {
+    ret = `${ret}${this.chunkToString(chunk, index)}\n`;
+  });
+  return ret;
+}
+```
 
 ## Conclusions
 
+We've seen that LLMs aren't reliable when it comes to answering questions,
+but that grounding them can help. Grounding with Google Search becomes a
+powerful tool that you can use that provides additional information about
+where the results come from, letting people better understand the context
+of the answers.
+
+LangChainJS further enhances this, providing tools that you can use to 
+format these results in ways that people would expect. These OutputParsers
+are flexible and let you tailor the output to your needs.
+
+I hope you enjoyed this article! I look forward to hearing about how
+Grounding with Google Search and LangChainJS has helped you develop
+better AI agents.
+
 ## Acknowledgements 
 
-The development of the Search Grounding in Gemini 2.0, the Output Parsers
-supporting it, and this documentation were all supported by Google Cloud
-Platform Credits provided by Google. My thanks to the teams at Google
-for their support.
+The development of LangChainJS support for Search Grounding in Gemini 2.0, 
+the Output Parsers supporting it, and this documentation were all supported 
+by Google Cloud Platform Credits provided by Google. 
+My thanks to the teams at Google for their support.
 
 Special thanks to Linda Lawton, Denis V., and Steven Gray for their help,
 feedback, and friendship.
