@@ -303,12 +303,12 @@ have that function return undefined:
 
 ```typescript
   protected segmentPrefix(
-        _grounding: GroundingInfo,
-        _support: GeminiGroundingSupport,
-        _index: number
-): string | undefined {
-  return undefined;
-}
+    _grounding: GroundingInfo, 
+    _support: GeminiGroundingSupport,
+    _index: number
+  ): string | undefined {
+    return undefined;
+  }
 ```
 
 But after each segment, we want the link indices to be a comma-separated
@@ -318,13 +318,13 @@ since that is more human friendly:
 
 ```typescript
   protected segmentSuffix(
-        _grounding: GroundingInfo,
-        support: GeminiGroundingSupport,
-        _index: number
-): string | undefined {
-  const indices: number[] = support.groundingChunkIndices.map((i) => i + 1);
-  return ` [${indices.join(", ")}]`;
-}
+    _grounding: GroundingInfo,
+    support: GeminiGroundingSupport,
+    _index: number
+  ): string | undefined {
+    const indices: number[] = support.groundingChunkIndices.map((i) => i + 1);
+    return ` [${indices.join(", ")}]`;
+  }
 ```
 
 Before the entire block of text, we just want to print a simple message
@@ -344,18 +344,18 @@ to the value returned:
 
 ```typescript
   protected chunkToString(chunk: GeminiGroundingChunk, index: number): string {
-  const info = chunk.retrievedContext ?? chunk.web;
-  return `${index + 1}. ${info.title} - ${info.uri}`;
-}
+    const info = chunk.retrievedContext ?? chunk.web;
+    return `${index + 1}. ${info.title} - ${info.uri}`;
+  }
 
-protected textSuffix(_text: string, grounding: GroundingInfo): string {
-  let ret = "\n";
-  const chunks: GeminiGroundingChunk[] = grounding.metadata.groundingChunks;
-  chunks.forEach((chunk, index) => {
-    ret = `${ret}${this.chunkToString(chunk, index)}\n`;
-  });
-  return ret;
-}
+  protected textSuffix(_text: string, grounding: GroundingInfo): string {
+    let ret = "\n";
+    const chunks: GeminiGroundingChunk[] = grounding.metadata.groundingChunks;
+    chunks.forEach((chunk, index) => {
+      ret = `${ret}${this.chunkToString(chunk, index)}\n`;
+    });
+    return ret;
+  }
 ```
 
 ## Conclusions
