@@ -157,14 +157,14 @@ itself.
 This is an array of objects that contain three attributes in each
 array element:
 
-`segment` - Which part of the content we're talking
+* `segment` - Which part of the content we're talking
 about. This contains the start and end index into the string content.
 
-`groundingChunkIndicies` - An array of numeric indexes into the
+* `groundingChunkIndicies` - An array of numeric indexes into the
 `groundingChunks` array. This indicates which of those chunks were used
 to create that output, or is a reference to that output.
 
-`confidenceScores` - Another array of numbers between 0 and 1 
+* `confidenceScores` - Another array of numbers between 0 and 1 
 indicating how likely the reference specified by the corresponding
 `groundingChunkIndicies` element is relevant to the reply given.
 
@@ -250,7 +250,7 @@ The `BaseGoogleSearchOutputParser` is an abstract class that provides four
 abstract methods that you would need to implement, plus one other that might
 be useful to either use or modify.
 
-**`textPrefix()` and `textSuffix()`**
+### `textPrefix()` and `textSuffix()`
 
 These two methods each take two parameters:
 * `text` - a string with the body of the reply from the Model.
@@ -263,13 +263,13 @@ as if it was an empty string.
 As the names suggest, you use this to specify a string that you wish to put
 either before or after content from the model.
 
-**`searchSuggestion()`**
+### `searchSuggestion()`
 
 This method is already defined, is passed a GroundingInfo object, and
 returns a string with the `renderedContent` field from the info. You
 may wish to include this as part of your `textSuffix()` implementation.
 
-**`segmentPrefix()` and `segmentSuffix()`**
+### `segmentPrefix()` and `segmentSuffix()`
 
 These methods are called for each `segment` that is available - the part of
 the content that we're talking about in each element of the `groundingSupports`.
@@ -280,6 +280,8 @@ They each take three parameters:
 * `grounding` - the GroundingInfo, which contains the `metadata` for the entire response.
 * `support` - The support information about this specific segment.
 * `index` - Which segment index we're working with, starting with 0
+
+### An example
 
 With this, we can see how the `SimpleGoogleSearchOutputParser` works.
 Our goal in this is to have a formatter that will put a numbered list
