@@ -19,7 +19,7 @@ between how it works in Gemini 1.5 and Gemini 2.0 (and how LangChainJS)
 hides the differences between the two, and how you can easily format
 the results using the Lang Chain Extension Language.
 
-## The beginning. And the problem.
+## The beginning... and the BIG problem.
 
 As you may remember, Gemini can be accessed on two different
 platforms, AI Studio and Vertex AI, with several different auth
@@ -110,7 +110,7 @@ the Gemini API this way doesn't give us access to this information.
 
 Or does it?
 
-## Getting references
+## Cite your sources!
 
 Gemini's Google Search Tool provides much of the same reference information
 that we could have gotten through Google Search itself, although it is
@@ -130,8 +130,8 @@ The `groundingMetadata` object contains several fields that can be
 useful to us. These are all objects provided directly from Gemini,
 and you can read the details at the documentation that I've linked to.
 
-**webSearchQueries** and 
-**[searchEntryPoint](https://ai.google.dev/api/generate-content#SearchEntryPoint)**
+### `webSearchQueries` and `searchEntryPoint`
+[documentation](https://ai.google.dev/api/generate-content#SearchEntryPoint)
 
 Google 
 [requires](https://ai.google.dev/gemini-api/docs/grounding/search-suggestions)
@@ -140,7 +140,8 @@ To help you do this, it provides a list of the search queries that you
 need to provide in `webSearchQueries`. It also provides some formatted
 HTML which accomplishes this in `searchEntryPoint`.
 
-**[groundingChunks](https://ai.google.dev/api/generate-content#GroundingChunk)**
+### `groundingChunks`
+[documentation](https://ai.google.dev/api/generate-content#GroundingChunk)
 
 This is an array of
 [`web`](https://ai.google.dev/api/generate-content#Web)
@@ -150,7 +151,8 @@ used to ground the information. You can provide them as citations. The
 URL that redirects through Google to go to the site with the information
 itself.
 
-**[groundingSupports](https://ai.google.dev/api/generate-content#GroundingSupport)**
+### `groundingSupports`
+[documentation](https://ai.google.dev/api/generate-content#GroundingSupport)
 
 This is an array of objects that contain three attributes in each
 array element:
