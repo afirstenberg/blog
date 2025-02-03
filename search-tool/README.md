@@ -364,7 +364,8 @@ to the value returned:
 ## Conclusions
 
 Large Language Models, such as Gemini, aren't reliable when it comes to
-answering questions. We should never rely on an LLM to provide "truth".
+answering questions. We should never rely on an LLM to provide "truth"
+and this undermines our trust in these systems.
 
 Fortunately, there are approaches that help us "ground" an LLM's answers
 in sets of data to help them be more trustworthy.
@@ -372,7 +373,8 @@ in sets of data to help them be more trustworthy.
 Grounding with Google Search becomes a
 powerful tool that you can use that provides additional information about
 where the results come from, letting people better understand the context
-of the answers.
+of the answers. This provides even more information that a person can use
+to evaluate how much they trust the answers.
 
 LangChainJS further enhances this, providing tools that you can use to 
 format these results in ways that people would expect. These OutputParsers
