@@ -185,16 +185,19 @@ of the library.
 We might visualize it as something like this:
 ![Formatting visualization](04-formatting.png)
 
-The Google modules provide a `BaseGoogleSearchOutputParser` abstract
-class which can take an AIMessage and, if there is `groundingMetadata`,
+The Google modules provide a 
+[`BaseGoogleSearchOutputParser`](https://v03.api.js.langchain.com/classes/_langchain_google_common.index.BaseGoogleSearchOutputParser.html) 
+abstract class which can take an AIMessage and, if there is `groundingMetadata`,
 format it to include this metadata. We'll look at how to create your
 own formatter in a moment, but there are some formatters already
 provided to address a couple of common use cases.
 
-The `SimpleGoogleSearchOutputParser` does some basic formatting and
-is useful for examining the output from the search grounding. More
-useful is probably the `MarkdownGoogleSearchOutputParser` can be
-used to create output that looks very similar to how AI Studio formats
+The [`SimpleGoogleSearchOutputParser`](https://v03.api.js.langchain.com/classes/_langchain_google_common.index.SimpleGoogleSearchOutputParser.html) 
+does some basic formatting and
+is useful for examining the output from the search grounding. 
+More useful is probably the 
+[`MarkdownGoogleSearchOutputParser`](https://v03.api.js.langchain.com/classes/_langchain_google_common.index.MarkdownGoogleSearchOutputParser.html) 
+which is used to create output that looks very similar to how AI Studio formats
 the output when search grounding is turned on.
 
 When using these classes, we'll need to import the parser we want 
