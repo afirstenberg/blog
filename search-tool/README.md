@@ -363,8 +363,13 @@ to the value returned:
 
 ## Conclusions
 
-We've seen that LLMs aren't reliable when it comes to answering questions,
-but that grounding them can help. Grounding with Google Search becomes a
+Large Language Models, such as Gemini, aren't reliable when it comes to
+answering questions. We should never rely on an LLM to provide "truth".
+
+Fortunately, there are approaches that help us "ground" an LLM's answers
+in sets of data to help them be more trustworthy.
+
+Grounding with Google Search becomes a
 powerful tool that you can use that provides additional information about
 where the results come from, letting people better understand the context
 of the answers.
@@ -384,5 +389,5 @@ the Output Parsers supporting it, and this documentation were all supported
 by Google Cloud Platform Credits provided by Google. 
 My thanks to the teams at Google for their support.
 
-Special thanks to Linda Lawton, Denis V., and Steven Gray for their help,
-feedback, and friendship.
+Special thanks to Linda Lawton, Denis V., Steven Gray, and Noble Ackerson
+for their help, feedback, and friendship.
