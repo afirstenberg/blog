@@ -49,7 +49,7 @@ const result = await model.invoke(question);
 console.log(result.content);
 ```
 
-Since Gemini 1.5 Flash has a knowledge cutoff date before the Nobel Prizes
+Since Gemini 2.0 Flash has a knowledge cutoff date before the Nobel Prizes
 were awarded in 2024, the answer might be something like this:
 
 ```text
