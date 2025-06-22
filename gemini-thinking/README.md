@@ -137,5 +137,101 @@ So the result might have looked something like this:
 We can certainly write some code that loops over the contents if it is an array and
 turns it into a string based on what we want to present and, perhaps, how we are
 displaying it. But LangChainJS offers another approach to formatting results from models
-known as Output Parsers. Output Parsers are classes that extend the `BaseLLMOutputParser`
-class and implement the `parseResult()` method.
+known as Output Parsers. 
+
+Output Parsers are classes that extend the `BaseLLMOutputParser`
+class and implement the `parseResult()` method. We then build a chain that takes the 
+results of a model, sends it to the Output Parser, which gives us a string.
+
+So an Output Parser that might format results that might (or might not)
+include reasoning tokens as markdown could look something like this:
+
+```typescript
+import { Callbacks } from "@langchain/core/callbacks/manager";
+import { BaseLLMOutputParser } from "@langchain/core/output_parsers";
+import { Generation, ChatGeneration } from "@langchain/core/outputs";
+
+export class ReasoningFormatter extends BaseLLMOutputParser<string> {
+  lc_namespace = ["langchain", "output_parsers"];
+
+  async parseResult(generations: Generation[] | ChatGeneration[], _callbacks?: Callbacks): Promise<string> {
+    const reasoning: string[] = [];
+    const text: string[] = [];
+    for (const generation of generations) {
+      if ('message' in generation) { 
+        // This is a ChatGeneration
+        const content = generation.message.content;
+        if (typeof content === 'string') {
+          text.push(content);
+        } else if (Array.isArray(content)) {
+          for (const part of content) {
+            if (part.type === 'text') {
+              text.push(part.text);
+            } else if (part.type === 'reasoning') {
+              reasoning.push(part.reasoning);
+            }
+            // Add other content types, such as images
+          }
+        }
+      } else { 
+        // This is a Generation
+        text.push(generation.text);
+      }
+    }
+
+    let markdown = "";
+    if (reasoning.length) {
+      // If there are any reasoning messages, add them to the markdown after a header
+      markdown += "## Reasoning\n" + reasoning.join("\n");
+    }
+    if (text.length) {
+      // If there are any text messages, we'll be adding them to the markdown
+      if (reasoning.length) {
+        // If there were reasoning messages (and thus a reasoning header),
+        // add the text header
+        markdown += "\n## Text\n";
+      }
+      markdown += text.join("\n");
+    }
+    return markdown;
+  }
+}
+```
+
+This handles the case where we aren't using reasoning tokens, so the AIMessage
+returned by the model has `string` content, as well as when reasoning tokens
+_are_ returned, where the content has complex message types which can include
+reasoning types.
+
+We use this very similarly to how we just use the model by itself, but 
+we'll use it as part of a chain that the model pipes its output to:
+
+```typescript
+const question = "You roll two 6-sided dice. What is the probability they add up to 7? Give me just the answer - do not explain.";
+const modelName = "gemini-2.5-flash";
+
+const model = new ChatGoogle({
+  modelName,
+  maxReasoningTokens: 1024,
+});
+
+const formatter = new ReasoningFormatter();
+const chain = model.pipe(formatter);
+
+const result = await chain.invoke(question);
+console.log(result);
+```
+
+Running this could give us something like:
+
+```markdown
+## Reasoning
+Alright, let's get this done efficiently. I need the probability of rolling a sum of 7 with two six-sided dice. Standard probability calculation here. First, I have to figure out the total number of possibilities, then count the successful outcomes, and finally, divide. Two dice, each with six faces, means 6 times 6, or 36 total outcomes. Now, let's get the combinations that equal 7: (1,6), (2,5), (3,4), (4,3), (5,2), and (6,1). That's six favorable outcomes. The probability, therefore, is 6 out of 36. Simplify that, and we're at 1/6. But the user wants *just* the answer. So that's what I will output.
+
+## Text
+1/6
+```
+
+## Conclusions
+
+## Acknowledgements
