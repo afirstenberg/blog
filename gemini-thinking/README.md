@@ -124,7 +124,7 @@ is in an object of type "text".
 
 So the result might have looked something like this:
 
-```json
+```
 [
   {
     type: 'reasoning',
