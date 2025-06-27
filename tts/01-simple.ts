@@ -1,0 +1,22 @@
+import { ChatGoogle } from "@langchain/google-gauth";
+import createBuffer from "audio-buffer-from";
+import play from "audio-play";
+
+const modelName = "gemini-2.5-flash-preview-tts";
+const responseModalities = ["AUDIO"];
+const speechConfig = "Zubenelgenubi";  // The name of the voice to use
+
+const model = new ChatGoogle({
+  modelName,
+  responseModalities,
+  speechConfig,
+});
+
+const prompt = "Say cheerfully: Have a wonderful day!";
+const result = await model.invoke( prompt );
+
+const audioContent = result?.content?.[0] as Record<string, any>;
+const audioData64 = audioContent.data;
+const audioBuffer = createBuffer(audioData64);
+await play(audioBuffer);
+

@@ -1,0 +1,9 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@langchain/core": "^0.3.61",
+    "@langchain/google-gauth": "^0.2.13",
+    "audio-buffer-from": "^1.1.1",
+    "audio-play": "^2.3.1"
+  }
+}
