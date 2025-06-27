@@ -10,9 +10,45 @@ In this article, we'll explore how developers can use the Gemini 2.5 models with
 LangChainJS, how to adjust the "thinking budget", why we might want to do so, and the 
 implications and impacts of doing this adjustment.
 
+## The "what" and "why" of reasoning models
+
+Reasoning models are based on research done for Large Language Models around
+better prompting techniques. One technique that was uncovered was known as
+"Chain of Thought" prompting, where the base prompt includes a few examples of a problem 
+and a step-by-step "thought process" that leads to the solution. 
+From these examples, the model sets up patterns that tend to break down complex problems 
+into smaller, manageable steps, mimicking a human-like reasoning process. 
+This often leads to more accurate and reliable results, especially for tasks requiring 
+logical deduction or multi-step calculations.
+
+### When to use reasoning models:
+
+*   **Complex Problem-Solving:** 
+  For tasks that require multiple steps, like solving a math word problem or a logic puzzle. 
+  The model can break down the problem and arrive at a more accurate solution.
+*   **Transparency:** 
+  When you need to understand *how* the model arrived at its answer. 
+  The "chain of thought" that reasoning provides can be invaluable for debugging, understanding, 
+  and building trust in the model's output.
+*   **Improved Accuracy:** 
+  For certain types of questions, allowing the model to "think" can lead to more accurate and 
+  nuanced answers.
+
+### When **not** to use reasoning models:
+
+*   **Simple, Factual Recall:** 
+  If you're just asking for a simple fact (e.g., "What is the capital of France?"), 
+  reasoning doesn't add anything.
+*   **Cost-Sensitive Applications:** 
+  Reasoning tokens are billed as output tokens, which are more expensive than input tokens.
+*   **Low-Latency Requirements:** 
+  The "thinking" process takes time. If your application requires rapid or "near real time"
+  responses, you'll want to disable reasoning.
+
 ## Using the Gemini 2.5 models
 
-If you're not interested in the "thinking" elements of Gemini 2.5, you can use them
+If you're not interested in the "thinking" elements of Gemini 2.5, but still want to
+take advantage of the reasoning abilities, you can use the Gemini 2.5 models
 just like you would any previous models.
 If you're not familiar with developing for
 Gemini with LangChainJS, you should check out 
@@ -105,14 +141,21 @@ In this case, the extra reasoning won't get a better answer, so it didn't make s
 to increase it. But other prompts might benefit from using more tokens. You'll need
 to experiment what works best for your uses.
 
-One other thing you might see, however, when we set the "maxReasoningTokens", however,
+_Tip:_ By default, 2.5 Pro and 2.5 Flash allocate the maxiumum number of
+reasoning tokens dynamically. They adjust based on the complexity of the
+query. If you want this for 2.5 Flash Lite, or you want the other side-effects,
+then you can set this to `-1`.
+
+What kind of side effects?
+One other thing you might see, when we set the "maxReasoningTokens"
 is that our output has changed. Instead of a simple string, we now get an array that
 includes both the answer along with the reasoning stages that went into it. Let's look
 at what this means and how we work with it.
 
 ## Looking at the reasoning "summary"
 
-When we explicitly set the "maxReasoningTokens", we get back result content that consists
+When we explicitly set the "maxReasoningTokens" (even if we set it to `-1`), 
+we get back result content that consists
 of multiple types. LangChainJS typically uses different types for input, allowing you
 to submit both text and images, for example. But it is also valid for output - especially
 when you want to see both the text result and the reasoning that may have gone into it.
@@ -212,7 +255,7 @@ const modelName = "gemini-2.5-flash";
 
 const model = new ChatGoogle({
   modelName,
-  maxReasoningTokens: 1024,
+  maxReasoningTokens: -1,
 });
 
 const formatter = new ReasoningFormatter();
@@ -234,4 +277,24 @@ Alright, let's get this done efficiently. I need the probability of rolling a su
 
 ## Conclusions
 
+Gemini 2.5's "thinking" mode offers a powerful new capability for developers. 
+We've seen how to use LangChainJS and the `maxReasoningTokens` parameter, allowing us 
+to either disable it for simple queries to save on cost and latency, or increase the 
+budget for more complex problems where a step-by-step thought process can 
+lead to more accurate results.
+
+While enabling reasoning provides valuable insight into the model's process, 
+it also changes the structure of the output so we can see that reasoning. 
+By creating a custom OutputParser we can elegantly handle this new format, 
+separating the reasoning summary from the final answer and presenting it in a clear, 
+structured way.
+
 ## Acknowledgements
+
+The development of LangChainJS support for Gemini 2.5 "thinking" 
+and this documentation were supported 
+by Google Cloud Platform Credits provided by Google. 
+My thanks to the teams at Google for their support.
+
+Special thanks to Linda Lawton, Denis V., Steven Gray, Noble Ackerson,
+and Xavier Portilla Edo for their help and feedback.
