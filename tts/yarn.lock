@@ -25,19 +25,19 @@
     zod "^3.25.32"
     zod-to-json-schema "^3.22.3"
 
-"@langchain/google-common@^0.2.13":
-  version "0.2.13"
-  resolved "https://registry.yarnpkg.com/@langchain/google-common/-/google-common-0.2.13.tgz#a0afceb3e9e4cbd6e6adae299776a17c9cd10d4f"
-  integrity sha512-Wd254vAajKxK3bIYPmuFRrk90oN3YIDzwwiO+3ojYKoWP+EBzW3eg3B4f8ofvGXUkJPxEwp/u8ymSsVUElUGlw==
+"@langchain/google-common@^0.2.14":
+  version "0.2.14"
+  resolved "https://registry.yarnpkg.com/@langchain/google-common/-/google-common-0.2.14.tgz#57e6597cdc69634808e735e2d65364e4b5abe6f3"
+  integrity sha512-oz1YwwPUP+FC5UMLus1reJ578LfNSEh81shqBP8xXDioLUfKub6p5Jye61gHm8JTXcSvKHPCLGPeK0Uq7PDx2g==
   dependencies:
     uuid "^10.0.0"
 
 "@langchain/google-gauth@^0.2.13":
-  version "0.2.13"
-  resolved "https://registry.yarnpkg.com/@langchain/google-gauth/-/google-gauth-0.2.13.tgz#cacbe4a50b28ae2241d62c359a567254de438761"
-  integrity sha512-JAIMtdmN+6/5aPRz3XUCFQ8+4TP272V8QCLhcyZ9LhDlnmY5DJv+LhzjMk9L5XZx9sRnKRvthVWiAY0Xbs3qAg==
+  version "0.2.14"
+  resolved "https://registry.yarnpkg.com/@langchain/google-gauth/-/google-gauth-0.2.14.tgz#1264628f86ab5eb38970f0e284c2ff716c6d14be"
+  integrity sha512-vS68e13eupTOfQ6P0QpIaOkiAlwZthV23U9Afm7b6rD2lsZ78jwTabzmmkU2o9x/DioNa9hEPpbE7+Z26V0NYg==
   dependencies:
-    "@langchain/google-common" "^0.2.13"
+    "@langchain/google-common" "^0.2.14"
     google-auth-library "^10.1.0"
 
 "@types/retry@0.12.0":

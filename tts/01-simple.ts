@@ -10,13 +10,19 @@ const model = new ChatGoogle({
   modelName,
   responseModalities,
   speechConfig,
-});
+})
 
 const prompt = "Say cheerfully: Have a wonderful day!";
 const result = await model.invoke( prompt );
 
 const audioContent = result?.content?.[0] as Record<string, any>;
 const audioData64 = audioContent.data;
-const audioBuffer = createBuffer(audioData64);
-await play(audioBuffer);
-
+const audioFormat = {
+  format: {
+    endianness: "be", // Big-Endian / network format
+    type: "int16", // 16 bit
+    sampleRate: 24000,
+  },
+};
+const audioBuffer = createBuffer( audioData64, audioFormat );
+await play( audioBuffer );
