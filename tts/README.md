@@ -32,7 +32,7 @@ class from the `google-gauth` package, but you can use one
 that meets your need. We do need to make sure we're configured
 to use the AI Studio API, since the preview models aren't available
 on Vertex AI yet, but this just involves us setting the
-"GOOGLE_API_KEY" environment variable be fore we test our code.
+"GOOGLE_API_KEY" environment variable before we test our code.
 
 We'll get to the code shortly, but first 
 there are a few things about configuration with the speech
