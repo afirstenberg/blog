@@ -17,6 +17,8 @@ const result = await model.invoke( prompt );
 
 const audioContent = result?.content?.[0] as Record<string, any>;
 const audioData64 = audioContent.data;
+// @ts-ignore
+const audioDataBuffer = Buffer.from( audioData64, "base64" );
 const audioFormat = {
   format: {
     endianness: "be", // Big-Endian / network format
@@ -24,5 +26,5 @@ const audioFormat = {
     sampleRate: 24000,
   },
 };
-const audioBuffer = createBuffer( audioData64, audioFormat );
+const audioBuffer = createBuffer( audioDataBuffer, audioFormat );
 await play( audioBuffer );
