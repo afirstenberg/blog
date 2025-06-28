@@ -29,7 +29,10 @@ Gemini with LangChainJS, you should check out
 
 For simplicity, we'll be using the `ChatGoogle`
 class from the `google-gauth` package, but you can use one
-that meets your need.
+that meets your need. We do need to make sure we're configured
+to use the AI Studio API, since the preview models aren't available
+on Vertex AI yet, but this just involves us setting the
+"GOOGLE_API_KEY" environment variable be fore we test our code.
 
 We'll get to the code shortly, but first 
 there are a few things about configuration with the speech
@@ -59,6 +62,15 @@ as a string.
 With this, we can create and configure our model with something like this:
 
 ```typescript
+const modelName = "gemini-2.5-flash-preview-tts";
+const responseModalities = ["AUDIO"];
+const speechConfig = "Zubenelgenubi";  // The name of the voice to use
+
+const model = new ChatGoogle({
+  modelName,
+  responseModalities,
+  speechConfig,
+})
 ```
 
 Once we've configured the model - we need to know a little bit about how
@@ -86,6 +98,8 @@ So creating the prompt and having the model
 run it can look something like this:
 
 ```typescript
+const prompt = "Say cheerfully: Have a wonderful day!";
+const result = await model.invoke( prompt );
 ```
 
 Simple, right?
@@ -109,7 +123,29 @@ If you're writing a node server, you might wrap it in a WAV file
 container and send this as a "data:" URI for the browser to play
 in an `<audio>` tag.
 
-** TODO: Continue here **
+We're going to use the "audio-buffer-from" and "audio-play"
+packages to create an audio buffer, with the correct formats,
+and then play it in a (relatively) device independent way.
+The audio buffer needs to be built using 16-bit big endian
+format with a sample rate of 24000.
+
+With this, we can use code like this to get the base64 data from
+the content, create the audio buffer with this data and the format, 
+and then play the audio buffer:
+
+```typescript
+const audioContent = result?.content?.[0] as Record<string, any>;
+const audioData64 = audioContent.data;
+const audioFormat = {
+  format: {
+    endianness: "be", // Big-Endian / network format
+    type: "int16", // 16 bit
+    sampleRate: 24000,
+  },
+};
+const audioBuffer = createBuffer( audioData64, audioFormat );
+await play( audioBuffer );
+```
 
 ## A Gemini duet
 
@@ -135,6 +171,16 @@ define our two speakers, "Brian" and "Sarah", with something like
 this:
 
 ```typescript
+const speechConfig = [
+  {
+    speaker: "Brian",
+    name: "Puck",
+  },
+  {
+    speaker: "Sarah",
+    name: "Kore",
+  },
+];
 ```
 
 ### Scripting the audio
@@ -148,6 +194,15 @@ about what we expect.
 For example, we might have a prompt with this conversation:
 
 ```typescript
+const prompt = `
+        TTS the following conversation between Brian and Sarah.
+        Pay attention to instructions about how each each person speaks,
+        and other sounds they may make.  
+        Brian: Hows it going today, Sarah?
+        Sarah Not too bad, how about you?
+        Brian: [Sighs and sounds tired] It has been a rough day. 
+        Brian: [Perks up] But the week should improve!
+      `;
 ```
 
 ### Roll the audio
@@ -155,9 +210,54 @@ For example, we might have a prompt with this conversation:
 The other parts of the example, creating the model, running it, and getting
 the audio from it, are the same as with our single-speaker example.
 
-For completeness, here is the complete example:
+For completeness, here is the full example:
 
 ```typescript
+import { ChatGoogle } from "@langchain/google-gauth";
+import createBuffer from "audio-buffer-from";
+import play from "audio-play";
+
+const modelName = "gemini-2.5-flash-preview-tts";
+const responseModalities = ["AUDIO"];
+const speechConfig = [
+  {
+    speaker: "Brian",
+    name: "Kore",
+  },
+  {
+    speaker: "Sarah",
+    name: "Puck",
+  },
+];
+
+const model = new ChatGoogle({
+  modelName,
+  responseModalities,
+  speechConfig,
+})
+
+const prompt = `
+        TTS the following conversation between Brian and Sarah.
+        Pay attention to instructions about how each each person speaks,
+        and other sounds they may make.  
+        Brian: Hows it going today, Sarah?
+        Sarah Not too bad, how about you?
+        Brian: [Sighs and sounds tired] It has been a rough day. 
+        Brian: [Perks up] But the week should improve!
+      `;
+const result = await model.invoke( prompt );
+
+const audioContent = result?.content?.[0] as Record<string, any>;
+const audioData64 = audioContent.data;
+const audioFormat = {
+  format: {
+    endianness: "be", // Big-Endian / network format
+    type: "int16", // 16 bit
+    sampleRate: 24000,
+  },
+};
+const audioBuffer = createBuffer( audioData64, audioFormat );
+await play( audioBuffer );
 ```
 
 ## Conclusion
