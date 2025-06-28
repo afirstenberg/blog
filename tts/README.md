@@ -400,7 +400,7 @@ async function talkAbout( topic: string): Promise<void> {
 await talkAbout("Sharks");
 ```
 
-This is a farily simple example. It won't work for very long topics
+This is a fairly simple example. It won't work for very long topics
 or conversations, for example, but is meant to illustrate the concept.
 
 A more robust implementation would make use of something like
@@ -408,9 +408,29 @@ LangGraph to handle the various phases of this task (generating
 the conversation vs playing the audio) and include portions that
 validate the output at each step. Done correctly, it could also break
 up each part to allow for a larger generated script and still
-play back each audio segment more quickly.
+play back each audio segment more quickly. If there is interest,
+I may write about this in the future.
 
 ## Conclusion
+
+The new text-to-speech models in Gemini, accessible through LangChainJS, 
+open up a world of possibilities for creating rich, audio-based applications. 
+As we've seen, generating both single-voice and multi-voice audio 
+requires just a few configuration changes. 
+
+But the real power 
+comes from combining the specialized TTS models with the broader 
+capabilities of other Gemini models, 
+allowing you to build complex workflows that 
+can research a topic, generate a script, and then perform it as a 
+natural-sounding conversation.
+
+While this technology is still in its preview phase, it already provides a 
+powerful and easy-to-use toolset. The examples in this repository provide a 
+starting point for your own explorations. 
+
+Go ahead and experiment with different voices, prompts, and chains to see
+what you can create. I can't wait to see... or hear... what you create.
 
 ## Acknowledgements
 
